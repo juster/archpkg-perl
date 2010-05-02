@@ -1,0 +1,35 @@
+* PERL 5.12 PKGBUILD
+
+Here is a repo to generate, and hopefully later, test the perl 5.12
+package for Archlinux.
+
+Right now there is not much to it.  Just run "make.pl" to
+generate a PKGBUILD.
+
+** WARNING
+
+Perl512Provides.pm is not perfect.  Right now we lookup modules on
+CPAN, using CPANPLUS.  However, this is looking up the latest module
+versions.  I haven't yet figured out how to only lookup the module
+versions specified by Module::CoreList.
+
+** TODO
+*** Figure out a way to install into a sandbox.
+    I would rather not break my system to see if the PKGBUILD "works".
+*** Create some automated tests to test the core perl packages
+
+** File List
+
+|--------------------+---------------------------------------------------|
+| Filename           | Purpose                                           |
+|--------------------+---------------------------------------------------|
+| dump_provides.pl   | Tests the Per512Provides.pm module.               |
+| make.pl            | Convert PKGBUILD.tt to PKGBUILD                   |
+| Perl512Provides.pm | Generates provides.                               |
+| PKGBUILD.tt        | The PKGBUILD template (its only var is provides). |
+| PKGBUILD           | The generated PKGBUILD.                           |
+|--------------------+---------------------------------------------------|
+
+** Author
+
+Justin Davis <juster at cpan dot org>

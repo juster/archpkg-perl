@@ -1,0 +1,6 @@
+2010-05-02  Justin Davis  <juster@cpan.org>
+
+	* PKGBUILD.tt: I removed the perl.install file.  Why are we
+	deleting files?  Shouldn't we be removing packages instead?
+	What if those files belong to packages?
+
