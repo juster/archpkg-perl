@@ -1,7 +1,9 @@
+[%# -*- mode: shell-script -*- -%]
 # $Id: PKGBUILD 54319 2009-10-08 13:26:47Z francois $
 # Maintainer: kevin <kevin.archlinux.org>
 # Contributor: judd <jvinet.zeroflux.org>
 # Contributor: francois <francois.archlinux.org> 
+# Contributor: Justin Davis <juster.cpan.org>
 pkgname=perl
 pkgver=5.12.0
 pkgrel=0
@@ -28,7 +30,8 @@ build() {
     # for i686
     arch_opts=""
   fi
-  ./Configure -des -Dusethreads -Duseshrplib -Doptimize="${CFLAGS}" -Dprefix=/usr \
+  ./Configure -des \
+    -Dusethreads -Doptimize="${CFLAGS}" -Dprefix=/usr \
     -Dinstallprefix=${pkgdir}/usr -Dvendorprefix=/usr \
     -Dprivlib=/usr/share/perl5/core_perl \
     -Darchlib=/usr/lib/perl5/core_perl \
@@ -43,9 +46,9 @@ build() {
     -Dinc_version_list=none \
     -Dman1ext=1perl -Dman3ext=3perl ${arch_opts}
 
-  make || return 1
-  TEST_JOBS=4 make test_harness || return 1
-  make install
+  ( make      &&
+    make test &&
+    make install ) || return 1
 
   ### Perl Settings ###
   # Change man page extensions for site and vendor module builds.
@@ -68,11 +71,15 @@ build() {
   install -D -m755 ${srcdir}/perlbin.sh \
                    ${pkgdir}/etc/profile.d/perlbin.sh
 
-  (cd ${pkgdir}/usr/bin; mv perl${pkgver} perl)
-  (cd ${pkgdir}/usr/bin/perlbin/core; \
-      ln -sf c2ph pstruct; ln -sf s2p psed)
-  grep -Rl "${pkgdir}" "${pkgdir}/usr" | \
-      xargs sed -i "s^${pkgdir}^^g"
+  ( cd ${pkgdir}/usr/bin
+    mv perl${pkgver} perl )
+
+  # These already exist ... ?
+  # (cd ${pkgdir}/usr/bin/perlbin/core; \
+  #     ln -sf c2ph pstruct; ln -sf s2p psed)
+
+  # grep -Rl "${pkgdir}" "${pkgdir}/usr" | \
+  #     xargs sed -i "s^${pkgdir}^^g"
 
   # Remove all pod files *except* those under /usr/share/perl5/core_perl/pod/
   # (FS#16488)
