@@ -3,11 +3,6 @@
 use warnings;
 use strict;
 use lib q{.};
-use Perl512Provides;
-use 5.010;
+use PerlProvides;
 
-my %provides = generate_provides();
-
-say q{provides=(};
-say "$_=$provides{$_}" for keys %provides;
-say q{)};
+print qq{provides=(\n}, scalar perl_provides( '5.012' ), qq{)\n};

@@ -2,6 +2,8 @@
 use warnings;
 use strict;
 
+package PerlProvides;
+
 use CPANPLUS::Dist::Arch qw(dist_pkgname dist_pkgver);
 use CPANPLUS::Backend    qw();
 use Module::CoreList     qw();
@@ -10,25 +12,40 @@ use ALPM; # for ALPM::Package::vercmp
 use Exporter;
 our @ISA = qw(Exporter);
 
-our @EXPORT = qw/ generate_provides provides_text /;
+our @EXPORT = qw(perl_provides);
 
-my %provides_ver_of;
-
-sub _have_newer_pkgver
+my %provides_for_ver;
+sub perl_provides
 {
-    my ($pkgname, $pkgver) = @_;
-    return 0 unless exists $provides_ver_of{ $pkgname };
-    return ( 1 > ALPM::Package::vercmp( $provides_ver_of{ $pkgname },
-                                        $pkgver ));
-}
+    Carp::croak 'Must supply a perl version as argument'
+        unless @_ > 0;
+    my $version = shift;
 
-sub generate_provides
-{
+    return $provides_for_ver{ $version }
+        if exists $provides_for_ver{ $version };
+
     my $be      = CPANPLUS::Backend->new();
-    my $modlist = $Module::CoreList::version{ 5.012 }
-        or die 'We need a more recent version of Module::CoreList';
+    my $modlist = $Module::CoreList::version{ $version }
+        or die qq{Try updating perl or the Module::CoreList module.
+Module::CoreList does not have info for perl $version};
 
+    my $provides = $provides_for_ver{ $version } = {};
 
+    # Store the package & version unless we have a newer version stored.
+    my $store_ref = sub {
+        my ($pkgname, $pkgver) = @_;
+
+        CHECK:
+        { 
+            last CHECK unless exists $provides->{ $pkgname };
+            my $cmp = ALPM::Package::vercmp( $provides->{ $pkgname },
+                                             $pkgver );
+            return if $cmp >= 0;
+        }
+        $provides->{ $pkgname } = $pkgver;
+        return;
+    };
+    
     MOD_LOOP:
     for my $module ( keys %$modlist ) {
         my $mod_obj = $be->module_tree( $module );
@@ -41,20 +58,18 @@ sub generate_provides
         my $mod_ver = $modlist->{ $module };
         my $pkgver  = $mod_ver ? dist_pkgver( $mod_ver ) : 0;
 
-    
-        $provides_ver_of{ $pkgname } = $pkgver
-            unless _have_newer_pkgver( $pkgname, $pkgver );
+        $store_ref->( $pkgname, $pkgver );
     }
 
-    return %provides_ver_of;
+    delete $provides->{ perl };
+    return wantarray ? %$provides : _to_string( $provides );
 }
 
-sub provides_text
+sub _to_string
 {
-    my %provides = generate_provides;
+    my $provides = shift;
 
-    delete $provides{'perl'};
-    return join q{}, map { "$_=$provides{$_}\n" } sort keys %provides;
+    return join q{}, map { "$_=$provides->{$_}\n" } sort keys %$provides;
 }
 
 1;
