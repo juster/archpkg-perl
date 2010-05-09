@@ -71,20 +71,16 @@ build() {
   (cd ${pkgdir}/usr/bin; mv perl${pkgver} perl)
   (cd ${pkgdir}/usr/bin/perlbin/core; \
       ln -sf c2ph pstruct; ln -sf s2p psed)
-  grep -Rl "${pkgdir}" ${pkgdir}/usr | \
+  grep -Rl "${pkgdir}" "${pkgdir}/usr" | \
       xargs sed -i "s^${pkgdir}^^g"
 
   # Remove all pod files *except* those under /usr/share/perl5/core_perl/pod/
   # (FS#16488)
-  rm -f $pkgdir/usr/share/perl5/core_perl/*.pod
-  for d in $pkgdir/usr/share/perl5/core_perl/*; do
-    if [ -d $d -a $(basename $d) != "pod" ]; then
-      find $d -name *.pod -delete
-    fi
-  done
+  find "${pkgdir}/usr/share/perl5/core_perl"  \
+      \( -name 'pod' -prune -o -name '*.pod' \) -type f \
+      -delete
 
-  find $pkgdir/usr/lib -name *.pod -delete
-  find $pkgdir -name .packlist -delete
+  find "${pkgdir}/usr/lib" -name '*.pod' -o -name '.packlist' -delete
 }
 
 md5sums=('3e15696f4160775a90f6b2fb3ccc98c2'
