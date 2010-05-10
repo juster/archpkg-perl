@@ -50,6 +50,7 @@ build() {
 }
 
 package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
   make install DESTDIR="$pkgdir"
 
   ( cd "${pkgdir}/usr/bin"
