@@ -13,15 +13,15 @@ license=('GPL' 'PerlArtistic')
 url="http://www.perl.org"
 groups=('base')
 depends=('gdbm' 'db>=4.8' 'coreutils' 'glibc' 'sh')
-source=(http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2
-    perlbin.sh )
+source=("http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2"
+        perlbin.sh )
 provides=(
 [% provides %]
 )
 options=('!makeflags' '!purge')
 
 build() {
-  cd ${srcdir}/${pkgname}-${pkgver}
+  cd "${srcdir}/${pkgname}-${pkgver}"
 
   if [ "${CARCH}" = "x86_64" ]; then
     # for x86_64
@@ -35,8 +35,8 @@ build() {
     -Dinstallprefix=/usr -Dvendorprefix=/usr \
     -Dprivlib=/usr/share/perl5/core_perl \
     -Darchlib=/usr/lib/perl5/core_perl \
-    -Dsitelib=/usr/share/perl5/site_perl/${pkgver} \
-    -Dsitearch=/usr/lib/perl5/site_perl/${pkgver} \
+    -Dsitelib="/usr/share/perl5/site_perl/${pkgver}" \
+    -Dsitearch="/usr/lib/perl5/site_perl/${pkgver}" \
     -Dvendorlib=/usr/share/perl5/vendor_perl \
     -Dvendorarch=/usr/lib/perl5/vendor_perl \
     -Dotherlibdirs=/usr/lib/perl5/current:/usr/lib/perl5/site_perl/current \
@@ -73,8 +73,8 @@ package() {
       -i ${pkgdir}/usr/share/perl5/core_perl/CPANPLUS/Config.pm
 
   # Profile script so set paths to perl scripts.
-  install -D -m755 ${srcdir}/perlbin.sh \
-                   ${pkgdir}/etc/profile.d/perlbin.sh
+  install -D -m755 "${srcdir}/perlbin.sh" \
+                   "${pkgdir}/etc/profile.d/perlbin.sh"
 
   # Convert hard links to symbolic links
   ( cd "${pkgdir}/usr/bin/perlbin/core"
