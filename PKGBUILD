@@ -12,8 +12,8 @@ license=('GPL' 'PerlArtistic')
 url="http://www.perl.org"
 groups=('base')
 depends=('gdbm' 'db>=4.8' 'coreutils' 'glibc' 'sh')
-source=(http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2
-    perlbin.sh )
+source=("http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2"
+        perlbin.sh )
 provides=(
 perl-ansicolor=2.02
 perl-app-cpan=1.5701
@@ -136,7 +136,7 @@ perl-xsloader=0.10
 options=('!makeflags' '!purge')
 
 build() {
-  cd ${srcdir}/${pkgname}-${pkgver}
+  cd "${srcdir}/${pkgname}-${pkgver}"
 
   if [ "${CARCH}" = "x86_64" ]; then
     # for x86_64
@@ -147,11 +147,11 @@ build() {
   fi
   ./Configure -des \
     -Dusethreads -Doptimize="${CFLAGS}" -Dprefix=/usr \
-    -Dinstallprefix=${pkgdir}/usr -Dvendorprefix=/usr \
+    -Dinstallprefix=/usr -Dvendorprefix=/usr \
     -Dprivlib=/usr/share/perl5/core_perl \
     -Darchlib=/usr/lib/perl5/core_perl \
-    -Dsitelib=/usr/share/perl5/site_perl/${pkgver} \
-    -Dsitearch=/usr/lib/perl5/site_perl/${pkgver} \
+    -Dsitelib="/usr/share/perl5/site_perl/${pkgver}" \
+    -Dsitearch="/usr/lib/perl5/site_perl/${pkgver}" \
     -Dvendorlib=/usr/share/perl5/vendor_perl \
     -Dvendorarch=/usr/lib/perl5/vendor_perl \
     -Dotherlibdirs=/usr/lib/perl5/current:/usr/lib/perl5/site_perl/current \
@@ -161,12 +161,21 @@ build() {
     -Dinc_version_list=none \
     -Dman1ext=1perl -Dman3ext=3perl ${arch_opts}
 
-  ( make      &&
-    make test &&
-    make install ) || return 1
+  export TEST_JOBS=3
+  ( make && make test_harness ) || return 1
+}
+
+# We use package() because the tests fail under fakeroot
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make install DESTDIR="$pkgdir"
+
+  ( cd "${pkgdir}/usr/bin"
+    mv "perl${pkgver}" perl )
 
   ### Perl Settings ###
   # Change man page extensions for site and vendor module builds.
+  # Why?
   sed -e '/^man1ext=/ s/1perl/1p/' -e '/^man3ext=/ s/3perl/3pm/' \
       -i ${pkgdir}/usr/lib/perl5/core_perl/Config_heavy.pl
 
@@ -183,26 +192,25 @@ build() {
       -i ${pkgdir}/usr/share/perl5/core_perl/CPANPLUS/Config.pm
 
   # Profile script so set paths to perl scripts.
-  install -D -m755 ${srcdir}/perlbin.sh \
-                   ${pkgdir}/etc/profile.d/perlbin.sh
+  install -D -m755 "${srcdir}/perlbin.sh" \
+                   "${pkgdir}/etc/profile.d/perlbin.sh"
 
-  ( cd ${pkgdir}/usr/bin
-    mv perl${pkgver} perl )
-
-  # These already exist ... ?
-  # (cd ${pkgdir}/usr/bin/perlbin/core; \
-  #     ln -sf c2ph pstruct; ln -sf s2p psed)
-
-  # grep -Rl "${pkgdir}" "${pkgdir}/usr" | \
-  #     xargs sed -i "s^${pkgdir}^^g"
+  # Why are we doing this?  (PS you forgot perlbug/perlthanks)
+  # Convert hard links to symbolic links
+  # ( cd "${pkgdir}/usr/bin/perlbin/core"
+  #   ln -sf c2ph    pstruct
+  #   ln -sf s2p     psed
+  #   ln -sf perlbug perlthanks
+  # )
 
   # Remove all pod files *except* those under /usr/share/perl5/core_perl/pod/
   # (FS#16488)
-  find "${pkgdir}/usr/share/perl5/core_perl"  \
-      \( -name 'pod' -prune -o -name '*.pod' \) -type f \
-      -delete
-
-  find "${pkgdir}/usr/lib" -name '*.pod' -o -name '.packlist' -delete
+  # Why are we doing this?
+  {
+      find "${pkgdir}/usr/share/perl5/core_perl" \
+          \( -name 'pod' -prune -o -name '*.pod' \) -type f -print0
+      find "${pkgdir}/usr/lib" -name '*.pod'
+  } | xargs -0r rm -f
 }
 
 md5sums=('3e15696f4160775a90f6b2fb3ccc98c2'
