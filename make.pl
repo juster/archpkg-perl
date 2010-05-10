@@ -18,4 +18,4 @@ $tt->process( 'PKGBUILD.tt',
 
 remove_tree( $_ ) for qw/ src pkg /;
 
-system 'makepkg';
+system 'makepkg -f';
