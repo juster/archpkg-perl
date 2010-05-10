@@ -46,9 +46,11 @@ build() {
     -Dinc_version_list=none \
     -Dman1ext=1perl -Dman3ext=3perl ${arch_opts}
 
-  ( make && make test ) || return 1
+  export TEST_JOBS=3
+  ( make && make test_harness ) || return 1
 }
 
+# We use package() because the tests fail under fakeroot
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make install DESTDIR="$pkgdir"
