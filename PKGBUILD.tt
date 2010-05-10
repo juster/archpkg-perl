@@ -32,7 +32,7 @@ build() {
   fi
   ./Configure -des \
     -Dusethreads -Doptimize="${CFLAGS}" -Dprefix=/usr \
-    -Dinstallprefix=${pkgdir}/usr -Dvendorprefix=/usr \
+    -Dinstallprefix=/usr -Dvendorprefix=/usr \
     -Dprivlib=/usr/share/perl5/core_perl \
     -Darchlib=/usr/lib/perl5/core_perl \
     -Dsitelib=/usr/share/perl5/site_perl/${pkgver} \
@@ -50,7 +50,7 @@ build() {
 }
 
 package() {
-  make install
+  make install DESTDIR="$pkgdir"
 
   ( cd "${pkgdir}/usr/bin"
     mv "perl${pkgver}" perl )
@@ -82,10 +82,6 @@ package() {
     ln -sf s2p     psed
     ln -sf perlbug perlthanks
   )
-
-  # This just replaces Config_heavy.pl, let's explicitly do this...
-  # grep -Rl "${pkgdir}" "${pkgdir}/usr" | \
-  #     xargs sed -i "s^${pkgdir}^^g"
 
   # Remove all pod files *except* those under /usr/share/perl5/core_perl/pod/
   # (FS#16488)
