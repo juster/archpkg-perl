@@ -1,19 +1,12 @@
 -*- Mode: org -*-
 
-* PERL 5.12 PKGBUILD
+* PERL PKGBUILD
 
 Here is a repo to generate, and hopefully later, test the perl 5.12
 package for Archlinux.
 
-Right now there is not much to it.  Just run "make.pl" to
-generate a PKGBUILD.
-
-** WARNING
-
-Perl512Provides.pm is not perfect.  Right now we lookup modules on
-CPAN, using CPANPLUS.  However, this is looking up the latest module
-versions.  I haven't yet figured out how to only lookup the module
-versions specified by Module::CoreList.
+Right now there is not much to it.  Just run "make.pl" to generate a
+PKGBUILD, clean old package directories, and build a new package.
 
 ** TODO
 *** Figure out a way to install into a sandbox.
@@ -21,16 +14,27 @@ versions specified by Module::CoreList.
 *** Create some automated tests to test the core perl packages
 
 ** File List
+|------------------+---------------------------------------------------|
+| Filename         | Purpose                                           |
+|------------------+---------------------------------------------------|
+| dump_provides.pl | Tests the PerlProvides.pm module.                 |
+| make.pl          | Clean the build process, then make package.       |
+| perlbin.sh       | The unchanged perlbin.sh.                         |
+| PerlProvides.pm  | Module for generating PKGBUILD provides.          |
+| PKGBUILD.tt      | The PKGBUILD template (its only var is provides). |
+| PKGBUILD         | The generated PKGBUILD.                           |
+|------------------+---------------------------------------------------|
 
-|--------------------+---------------------------------------------------|
-| Filename           | Purpose                                           |
-|--------------------+---------------------------------------------------|
-| dump_provides.pl   | Tests the Per512Provides.pm module.               |
-| make.pl            | Convert PKGBUILD.tt to PKGBUILD                   |
-| Perl512Provides.pm | Generates provides.                               |
-| PKGBUILD.tt        | The PKGBUILD template (its only var is provides). |
-| PKGBUILD           | The generated PKGBUILD.                           |
-|--------------------+---------------------------------------------------|
+*** PerlProvides.pm
+    PerlProvides.pm is not perfect.  Right now we lookup modules on CPAN,
+    using CPANPLUS.  However, this is looking up the latest module
+    versions.  I haven't yet figured out how to only lookup the module
+    versions specified by Module::CoreList.
+
+*** perl.install
+    I removed the perl.install file.  Why are we deleting files?
+    Shouldn't we be removing packages instead?  What if those files
+    belong to packages?
 
 ** Author
 
