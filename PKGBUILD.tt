@@ -57,6 +57,7 @@ package() {
 
   ### Perl Settings ###
   # Change man page extensions for site and vendor module builds.
+  # Why?
   sed -e '/^man1ext=/ s/1perl/1p/' -e '/^man3ext=/ s/3perl/3pm/' \
       -i ${pkgdir}/usr/lib/perl5/core_perl/Config_heavy.pl
 
@@ -76,15 +77,17 @@ package() {
   install -D -m755 "${srcdir}/perlbin.sh" \
                    "${pkgdir}/etc/profile.d/perlbin.sh"
 
+  # Why are we doing this?  (PS you forgot perlbug/perlthanks)
   # Convert hard links to symbolic links
-  ( cd "${pkgdir}/usr/bin/perlbin/core"
-    ln -sf c2ph    pstruct
-    ln -sf s2p     psed
-    ln -sf perlbug perlthanks
-  )
+  # ( cd "${pkgdir}/usr/bin/perlbin/core"
+  #   ln -sf c2ph    pstruct
+  #   ln -sf s2p     psed
+  #   ln -sf perlbug perlthanks
+  # )
 
   # Remove all pod files *except* those under /usr/share/perl5/core_perl/pod/
   # (FS#16488)
+  # Why are we doing this?
   {
       find "${pkgdir}/usr/share/perl5/core_perl" \
           \( -name 'pod' -prune -o -name '*.pod' \) -type f -print0
