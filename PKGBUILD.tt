@@ -46,9 +46,14 @@ build() {
     -Dinc_version_list=none \
     -Dman1ext=1perl -Dman3ext=3perl ${arch_opts}
 
-  ( make      &&
-    make test &&
-    make install ) || return 1
+  ( make && make test ) || return 1
+}
+
+package() {
+  make install
+
+  ( cd "${pkgdir}/usr/bin"
+    mv "perl${pkgver}" perl )
 
   ### Perl Settings ###
   # Change man page extensions for site and vendor module builds.
@@ -71,23 +76,24 @@ build() {
   install -D -m755 ${srcdir}/perlbin.sh \
                    ${pkgdir}/etc/profile.d/perlbin.sh
 
-  ( cd ${pkgdir}/usr/bin
-    mv perl${pkgver} perl )
+  # Convert hard links to symbolic links
+  ( cd "${pkgdir}/usr/bin/perlbin/core"
+    ln -sf c2ph    pstruct
+    ln -sf s2p     psed
+    ln -sf perlbug perlthanks
+  )
 
-  # These already exist ... ?
-  # (cd ${pkgdir}/usr/bin/perlbin/core; \
-  #     ln -sf c2ph pstruct; ln -sf s2p psed)
-
+  # This just replaces Config_heavy.pl, let's explicitly do this...
   # grep -Rl "${pkgdir}" "${pkgdir}/usr" | \
   #     xargs sed -i "s^${pkgdir}^^g"
 
   # Remove all pod files *except* those under /usr/share/perl5/core_perl/pod/
   # (FS#16488)
-  find "${pkgdir}/usr/share/perl5/core_perl"  \
-      \( -name 'pod' -prune -o -name '*.pod' \) -type f \
-      -delete
-
-  find "${pkgdir}/usr/lib" -name '*.pod' -o -name '.packlist' -delete
+  {
+      find "${pkgdir}/usr/share/perl5/core_perl" \
+          \( -name 'pod' -prune -o -name '*.pod' \) -type f -print0
+      find "${pkgdir}/usr/lib" -name '*.pod'
+  } | xargs -0r rm -f
 }
 
 md5sums=('3e15696f4160775a90f6b2fb3ccc98c2'
