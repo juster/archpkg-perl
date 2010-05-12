@@ -91,7 +91,6 @@ perl-params-check=0.26
 perl-parent=0.223
 perl-parse-cpan-meta=1.40
 perl-pathtools=3.31
-perl-perl=4.4
 perl-perlio-via-quotedprint=0.06
 perl-pod-escapes=1.04
 perl-pod-latex=0.58
@@ -146,6 +145,7 @@ build() {
     arch_opts=""
   fi
   ./Configure -des \
+    -Dinstallusrbinperl -Duseshrplib \
     -Dusethreads -Doptimize="${CFLAGS}" -Dprefix=/usr \
     -Dinstallprefix=/usr -Dvendorprefix=/usr \
     -Dprivlib=/usr/share/perl5/core_perl \
@@ -169,9 +169,6 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make install DESTDIR="$pkgdir"
-
-  ( cd "${pkgdir}/usr/bin"
-    mv "perl${pkgver}" perl )
 
   ### Perl Settings ###
   # Change man page extensions for site and vendor module builds.

@@ -31,6 +31,7 @@ build() {
     arch_opts=""
   fi
   ./Configure -des \
+    -Dinstallusrbinperl -Duseshrplib \
     -Dusethreads -Doptimize="${CFLAGS}" -Dprefix=/usr \
     -Dinstallprefix=/usr -Dvendorprefix=/usr \
     -Dprivlib=/usr/share/perl5/core_perl \
@@ -54,9 +55,6 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make install DESTDIR="$pkgdir"
-
-  ( cd "${pkgdir}/usr/bin"
-    mv "perl${pkgver}" perl )
 
   ### Perl Settings ###
   # Change man page extensions for site and vendor module builds.
