@@ -132,7 +132,7 @@ perl-win32api-file=0.1101
 perl-xsloader=0.10
 
 )
-options=('!makeflags' '!purge')
+options=('!makeflags' '!purge' '!strip')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
