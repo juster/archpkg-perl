@@ -18,7 +18,7 @@ source=("http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2"
 provides=(
 [% provides %]
 )
-options=('!makeflags' '!purge')
+options=('!makeflags' '!purge' '!strip')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -48,7 +48,7 @@ build() {
     -Dman1ext=1perl -Dman3ext=3perl ${arch_opts}
 
   export TEST_JOBS=3
-  ( make && make test_harness ) || return 1
+  ( make [% UNLESS skiptest %]&& make test_harness [% END %]) || return 1
 }
 
 # We use package() because the tests fail under fakeroot
