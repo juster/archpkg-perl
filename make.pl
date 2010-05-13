@@ -9,8 +9,10 @@ use File::Path   qw(remove_tree);
 use Getopt::Long qw(GetOptions);
 use Template     qw();
 
-my ($SKIP_TEST);
-GetOptions( 'skiptest' => \$SKIP_TEST );
+my ($SKIP_TEST, $REGEN_ONLY);
+GetOptions( 'skiptest' => \$SKIP_TEST,
+            'regen'    => \$REGEN_ONLY,
+           );
 
 my $tt = Template->new();
 
@@ -21,6 +23,8 @@ $tt->process( 'PKGBUILD.tt',
                 skiptest => $SKIP_TEST,
                },
               'PKGBUILD' ) or die "TT process failed: ", $tt->error;
+
+exit 0 if $REGEN_ONLY;
 
 remove_tree( $_ ) for qw/ src pkg /;
 
